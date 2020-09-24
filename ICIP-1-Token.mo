@@ -13,44 +13,56 @@ type TokenId = Nat32;
 // Token amounts are unbounded
 type Balance = Nat;
 
-// Details for a token, eg. name, symbol, description, decimals. Metadata format TBD.
+// Details for a token, eg. name, symbol, description, decimals.
+// Metadata format TBD, possible option is JSON blob
 type Metadata = Text;
 type MetadataResponse = Result.Result<[Metadata], {
   #InvalidToken: TokenId;
 }>;
 
 // Request and responses for getBalance
-type BalanceRequest = { user: User; tokenId: TokenId };
-type BalanceError = {
-  #Unauthorized;
-  #InvalidDestination: User;
-  #InvalidToken: TokenId;
-  #InsufficientBalance;
+type BalanceRequest = {
+  user: User;
+  tokenId: TokenId;
 };
-type BalanceResponse = Result.Result<[Balance], BalanceError>;
+type BalanceResponse = Result.Result<[Balance], {
+  #InvalidToken: TokenId;
+}>;
 
 // Request and responses for transfer
-type TransferRequest = { from: User; to: User; tokenId: TokenId; amount: Balance };
-type TransferError = {
+type TransferRequest = {
+  from: User;
+  to: User;
+  tokenId: TokenId;
+  amount: Balance;
+};
+type TransferResponse = Result.Result<(), {
   #Unauthorized;
   #InvalidDestination: User;
   #InvalidToken: TokenId;
   #InsufficientBalance;
-};
-type TransferResponse = Result.Result<(), TransferError>;
+}>;
 
 // Request and responses for updateOperator
-type OperatorAction = { #AddOperator; #RemoveOperator };
-type OperatorRequest = { owner: User; operators: [(User, OperatorAction)] };
-type OperatorError = {
+type OperatorAction = {
+  #AddOperator;
+  #RemoveOperator;
+};
+type OperatorRequest = {
+  owner: User;
+  operators: [(User, OperatorAction)];
+};
+type OperatorResponse = Result.Result<(), {
   #Unauthorized;
   #InvalidOwner: User;
-};
-type OperatorResponse = Result.Result<(), OperatorError>;
+}>;
 
-// Request and responses for isOperator
-type IsOperatorRequest = { owner: User; operator: User };
-type IsOperatorResponse = [Bool];
+// Request and responses for isAuthorized
+type IsAuthorizedRequest = {
+  owner: User;
+  operator: User;
+};
+type IsAuthorizedResponse = [Bool];
 
 // Utility functions for User and TokenId, useful when implementing containers
 module User = {
@@ -123,7 +135,7 @@ type Token = actor {
   updateOperator: shared (requests: [OperatorRequest]) -> async OperatorResponse;
 
   /**
-    Batch function to check if a user is an operator for an owner.
+    Batch function to check if a user is authorized to transfer for an owner.
   */
-  isOperator: query (requests: [IsOperatorRequest]) -> async IsOperatorResponse;
+  isAuthorized: query (requests: [IsAuthorizedRequest]) -> async IsAuthorizedResponse;
 };
