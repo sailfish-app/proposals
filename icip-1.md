@@ -32,6 +32,8 @@ exist yet, this document refers to "ICIP-1" for convenience only.</em>
   - [Non-fungible Tokens](#non-fungible-tokens)
   - [Mixing Fungible and Non-fungible Tokens](#mixing-fungible-and-non-fungible-tokens)
   - [Non-transferable Tokens](#non-transferable-tokens)
+- [Additional Ideas](#additional-ideas)
+- [References](#references)
 - [Copyright](#copyright)
 
 ## Summary
@@ -130,20 +132,15 @@ specifications can be generated as needed.
 
 ```
 type Token = actor {
-  getBalance:
-    query (requests: [BalanceRequest]) -> async BalanceResponse;
+  getBalance: query (requests: [BalanceRequest]) -> async BalanceResponse;
 
-  getMetadata:
-    query (tokenIds: [TokenId]) -> async MetadataResponse;
+  getMetadata: query (tokenIds: [TokenId]) -> async MetadataResponse;
 
-  transfer:
-    shared (requests: [TransferRequest]) -> async TransferResponse;
+  transfer: shared (requests: [TransferRequest]) -> async TransferResponse;
 
-  updateOperator:
-    shared (requests: [OperatorRequest]) -> async OperatorResponse;
+  updateOperator: shared (requests: [OperatorRequest]) -> async OperatorResponse;
 
-  isAuthorized:
-    query (requests: [IsAuthorizedRequest]) -> async IsAuthorizedResponse;
+  isAuthorized: query (requests: [IsAuthorizedRequest]) -> async IsAuthorizedResponse;
 };
 ```
 
