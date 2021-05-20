@@ -290,12 +290,12 @@ operator can transfer tokens of that type belonging to the owner.
 ```
 type TokenIds = {
   #All;
-  #Some: [TokenId];
+  #Some: (TokenId, ?Balance);
 };
 
 type OperatorAction = {
-  #AddOperator: TokenIds;
-  #RemoveOperator: TokenIds;
+  #SetOperator: TokenIds;
+  #RemoveOperator: ?[TokenId];
 };
 
 type OperatorRequest = {
@@ -311,14 +311,14 @@ type OperatorResponse = Result.Result<(), {
 type updateOperator = (requests: [OperatorRequest]) -> async OperatorResponse;
 ```
 
-Add or Remove token operators for the specified token owners and token IDs.
+Update or Remove token operators for the specified token owners, token IDs and balances.
 
 - The entrypoint accepts a list of `OperatorRequest`s. If two different requests
   in the list add and remove an operator for the same token owner and token ID,
   the last command in the list MUST take effect.
 
 - Adding an operator for `#All` token IDs MUST grant permissions to all current
-  and future tokens owned by the owner. Similarly, removing an operator for
+  and future tokens owned by the owner for ALL balances. Similarly, removing an operator for
   `#All` token IDs MUST remove permissions for all current and future tokens.
 
 - It is possible to update operators for a token owner that does not hold any
@@ -338,7 +338,9 @@ owner (`owner == caller`) or be limited to an administrator. If so, the
 ```
 type IsAuthorizedRequest = {
   owner: User;
-  operator: User
+  operator: User;
+  tokenId: TokenId;
+  amount: Balance;
 };
 
 type IsAuthorizedResponse = [Bool];
@@ -347,7 +349,7 @@ type isAuthorized = query (requests: [IsAuthorizedRequest]) -> async IsAuthorize
 ```
 
 Checks whether the specified `operator` principal is authorized to transfer on
-behalf of the `owner` principal.
+behalf of the `owner` principal the token `tokenId` of `amount`.
 
 - Results MUST be consistent with authorization checks in `transfer` operations.
   If `isAuthorized` returns `True` for a given operator and owner pair, then
@@ -359,7 +361,7 @@ behalf of the `owner` principal.
 ##### `getMetadata`
 
 ```
-type Metadata = Text;
+type Metadata = Blob;
 
 type MetadataResponse = Result.Result<[Metadata], {
   #InvalidToken: TokenId;
